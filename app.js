@@ -1,6 +1,5 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
-
-let catalogoGlobal = [];
+const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
 async function cargarSpotiflix() {
   try {
@@ -8,38 +7,45 @@ async function cargarSpotiflix() {
     const data = await res.json();
 
     const usuarioActual = (data.usuarios && data.usuarios.length > 0)
-      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivanglopezp@gmail.com") || data.usuarios[0])
+      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivan@gmail.com") || data.usuarios[0])
       : null;
 
     if (usuarioActual && usuarioActual.nombre) {
       document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
     }
 
-    // 1. Guardar y renderizar Películas
+    // 1. Películas
     if (usuarioActual && usuarioActual.peliculas_fav && data.cat_peliculas) {
       const peliIds = usuarioActual.peliculas_fav.toString().split(",");
       const pelisFavoritas = peliIds.map(id => {
         return data.cat_peliculas.find(p => p.id && p.id.toString().trim() === id.trim());
       }).filter(Boolean);
 
-      catalogoGlobal.push(...pelisFavoritas);
       renderCards("fav-movies", pelisFavoritas, false);
-      
-      // Cargar la primera película por defecto en el reproductor
-      if (pelisFavoritas.length > 0) {
-        reproducirElemento(pelisFavoritas[0]);
-      }
+      if (pelisFavoritas.length > 0) reproducirElemento(pelisFavoritas[0], false);
     }
 
-    // 2. Guardar y renderizar Series
+    // 2. Series
     if (usuarioActual && usuarioActual.series_fav && data.cat_series) {
       const serieIds = usuarioActual.series_fav.toString().split(",");
       const seriesFavoritas = serieIds.map(id => {
         return data.cat_series.find(s => s.id && s.id.toString().trim() === id.trim());
       }).filter(Boolean);
 
-      catalogoGlobal.push(...seriesFavoritas);
       renderCards("fav-series", seriesFavoritas, true);
+    }
+
+    // 3. Canciones
+    if (usuarioActual && usuarioActual.canciones_fav && data.cat_canciones) {
+      const cancionIds = usuarioActual.canciones_fav.toString().split(",");
+      const cancionesFavoritas = cancionIds.map(id => {
+        return data.cat_canciones.find(c => c.id && c.id.toString().trim() === id.trim());
+      }).filter(Boolean);
+
+      renderSongs(cancionesFavoritas);
+    } else if (data.cat_canciones) {
+      // Fallback: mostrar todo el catálogo de canciones si no hay filtro de favoritas
+      renderSongs(data.cat_canciones);
     }
 
   } catch (error) {
@@ -48,44 +54,74 @@ async function cargarSpotiflix() {
   }
 }
 
-// Función para cargar el video o la portada según disponibilidad
-function reproducirElemento(item) {
-  const playerContainer = document.getElementById("featured-player");
-  playerContainer.innerHTML = "";
+// Lógica de reproducción de video
+function reproducirElemento(item, autoPlay = true) {
+  const videoPlayer = document.getElementById("main-video-player");
+  const playingTitle = document.getElementById("playing-title");
+  const playingInfo = document.getElementById("playing-info");
 
-  if (item.video && item.video.trim() !== "") {
-    const videoElement = document.createElement("video");
-    videoElement.className = "hero-media";
-    videoElement.src = item.video;
-    videoElement.controls = true;
-    videoElement.autoplay = true;
+  const videoSrc = (item.video && item.video.trim() !== "") ? item.video : DEFAULT_VIDEO;
 
-    // Fallback si falla la carga o reproducción del video
-    videoElement.onerror = () => mostrarPortadaFallback(item);
+  videoPlayer.poster = item.poster || "";
+  videoPlayer.src = videoSrc;
+  playingTitle.textContent = item.nombre || "Sin título";
 
-    playerContainer.appendChild(videoElement);
-  } else {
-    mostrarPortadaFallback(item);
+  const subtitulo = item.temporada 
+    ? `Serie • ${item.temporada} Temporadas • ${item.genero || ""}`
+    : `Película • ${item.genero || ""} • ${item.year || ""}`;
+
+  playingInfo.textContent = `${subtitulo} ${item.resumen ? "— " + item.resumen : ""}`;
+
+  if (autoPlay) videoPlayer.play().catch(() => {});
+}
+
+// Lógica para reproducir canción en la barra inferior
+function reproducirCancion(cancion) {
+  const audioPlayer = document.getElementById("main-audio-player");
+  const titleElem = document.getElementById("audio-track-title");
+  const artistElem = document.getElementById("audio-track-artist");
+
+  titleElem.textContent = cancion.cancion || cancion.nombre || "Sin título";
+  artistElem.textContent = cancion.artista || "Artista desconocido";
+
+  if (cancion.audio) {
+    audioPlayer.src = cancion.audio;
+    audioPlayer.play().catch(err => console.log("Error al reproducir audio:", err));
   }
 }
 
-// Renderiza la portada cuando no hay video o da error
-function mostrarPortadaFallback(item) {
-  const playerContainer = document.getElementById("featured-player");
-  const subtitulo = item.temporada 
-    ? `${item.temporada} Temporadas • ${item.genero}`
-    : `${item.genero} • ${item.year}`;
+// Renderizado de la tabla de canciones
+function renderSongs(canciones) {
+  const tbody = document.getElementById("songs-list");
+  tbody.innerHTML = "";
 
-  playerContainer.innerHTML = `
-    <div class="hero-fallback" style="background-image: url('${item.poster}');">
-      <div class="hero-overlay">
-        <h2>${item.nombre}</h2>
-        <p>${subtitulo}</p>
-      </div>
-    </div>
-  `;
+  if (!canciones || canciones.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">No hay canciones disponibles.</td></tr>`;
+    return;
+  }
+
+  canciones.forEach(cancion => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="play-btn-cell">▶</td>
+      <td><a href="#" class="song-link">${cancion.cancion || cancion.nombre}</a></td>
+      <td>${cancion.artista || "-"}</td>
+      <td>${cancion.album || "-"}</td>
+    `;
+
+    // Asignar clic tanto al botón play como al nombre de la canción
+    tr.querySelector(".play-btn-cell").addEventListener("click", () => reproducirCancion(cancion));
+    tr.querySelector(".song-link").addEventListener("click", (e) => {
+      e.preventDefault();
+      reproducirCancion(cancion);
+    });
+
+    tbody.appendChild(tr);
+  });
 }
 
+// Renderizado de carruseles
 function renderCards(containerId, items, esSerie = false) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -102,7 +138,7 @@ function renderCards(containerId, items, esSerie = false) {
 
     const card = document.createElement("article");
     card.className = "card";
-    card.onclick = () => reproducirElemento(item);
+    card.addEventListener("click", () => reproducirElemento(item, true));
 
     card.innerHTML = `
       <img src="${item.poster}" alt="${item.nombre}" loading="lazy">
@@ -117,12 +153,7 @@ function renderCards(containerId, items, esSerie = false) {
 function moverCarrusel(containerId, direccion) {
   const track = document.getElementById(containerId);
   if (!track) return;
-  
-  const desplazamiento = 175 * 3;
-  track.scrollBy({
-    left: direccion * desplazamiento,
-    behavior: 'smooth'
-  });
+  track.scrollBy({ left: direccion * 175 * 3, behavior: 'smooth' });
 }
 
 cargarSpotiflix();
