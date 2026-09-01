@@ -140,35 +140,47 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
 
     async function cargarSpotiflix() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-        // 1. Obtener datos del usuario activo
-        const usuarioActual = data.usuarios.find(u => u.correo === "ivanglopezp@gmail.com") || data.usuarios[0];
-        document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
+    // 1. Obtener datos del usuario (validando estructuras)
+    const usuarioActual = (data.usuarios && data.usuarios.length > 0) 
+      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivan@gmail.com") || data.usuarios[0])
+      : null;
 
-        // 2. Renderizar Películas Favoritas
-        const peliIds = usuarioActual.peliculas_fav ? usuarioActual.peliculas_fav.split(",") : [];
-        const pelisFavoritas = peliIds.map(id => {
-          return data.cat_peliculas.find(p => p.id === id.trim());
-        }).filter(Boolean);
-
-        renderCards("fav-movies", pelisFavoritas);
-
-        // 3. Renderizar Series Favoritas
-        const serieIds = usuarioActual.series_fav ? usuarioActual.series_fav.split(",") : [];
-        const seriesFavoritas = serieIds.map(id => {
-          return data.cat_series.find(s => s.id === id.trim());
-        }).filter(Boolean);
-
-        renderCards("fav-series", seriesFavoritas, true);
-
-      } catch (error) {
-        console.error("Error al cargar los datos:", error);
-        document.getElementById("user-name").textContent = "Error al cargar los datos.";
-      }
+    if (usuarioActual && usuarioActual.nombre) {
+      document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
+    } else {
+      document.getElementById("user-name").textContent = "Perfil de Usuario";
     }
+
+    // 2. Renderizar Películas Favoritas
+    if (usuarioActual && usuarioActual.peliculas_fav && data.cat_peliculas) {
+      const peliIds = usuarioActual.peliculas_fav.toString().split(",");
+      const pelisFavoritas = peliIds.map(id => {
+        return data.cat_peliculas.find(p => p.id && p.id.toString().trim() === id.trim());
+      }).filter(Boolean);
+
+      renderCards("fav-movies", pelisFavoritas, false);
+    }
+
+    // 3. Renderizar Series Favoritas
+    if (usuarioActual && usuarioActual.series_fav && data.cat_series) {
+      const serieIds = usuarioActual.series_fav.toString().split(",");
+      const seriesFavoritas = serieIds.map(id => {
+        return data.cat_series.find(s => s.id && s.id.toString().trim() === id.trim());
+      }).filter(Boolean);
+
+      renderCards("fav-series", seriesFavoritas, true);
+    }
+
+  } catch (error) {
+    console.error("Error al cargar los datos:", error);
+    // Solo muestra error si realmente falló el fetch
+    document.getElementById("user-name").textContent = "Error al conectar con la API.";
+  }
+}
 
     // Función auxiliar para renderizar tarjetas en cualquier track
     function renderCards(containerId, items, esSerie = false) {
