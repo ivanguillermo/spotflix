@@ -1,202 +1,68 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spotiflix</title>
-  
-  <link rel="shortcut icon" href="spotiflix_logo.png" type="image/x-icon" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="spotflix.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotiflix - Demo</title>
+  <style>
+    body { font-family: sans-serif; background: #141414; color: #fff; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
+    .card { background: #222; border-radius: 8px; overflow: hidden; text-align: center; padding-bottom: 10px; }
+    .card img { width: 100%; height: 220px; object-fit: cover; }
+    .card h4 { margin: 10px 0 5px; font-size: 14px; }
+    .card p { font-size: 12px; color: #aaa; margin: 0; }
+  </style>
 </head>
 <body>
 
-  <!-- NAV SUPERIOR -->
-  <nav id="navflix">
-    <div class="nav-brand">
-      <img src="spotiflix_logo.png" alt="Spotiflix" class="img_nav" />
-      <span>Spotiflix</span>
-    </div>
-    
-    <div class="nav-menu">
-      <a href="#player-section">Player</a>
-      <a href="#films">Films</a>
-      <a href="#series">Series</a>
-      <a href="#musica">Música</a>
-      <a href="#literatura">Literatura</a>
-      <a href="#deportes">Favoritos</a>
-    </div>
+  <div id="user-profile">
+    <h2 id="user-name">Cargando usuario...</h2>
+    <h3>Películas Favoritas</h3>
+    <div id="fav-movies" class="grid"></div>
+  </div>
 
-    <!-- Área de Usuario / Google OAuth -->
-    <div class="nav-auth">
-      <button id="btn-google-login" class="btn-auth">
-        <i class="fa-brands fa-google"></i> Iniciar Sesión
-      </button>
-      <div id="user-profile" class="user-profile hidden">
-        <img id="user-avatar" class="avatar" src="" alt="User" />
-        <span id="user-name"></span>
-        <button id="btn-logout" class="btn-logout" title="Cerrar sesión"><i class="fa-solid fa-right-from-bracket"></i></button>
-      </div>
-    </div>
-  </nav>
+  <script>
+    // Reemplaza esta URL con la Web App URL que te da Apps Script al desplegar
+    const API_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <main class="main-content">
+    async function cargarSpotiflix() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
 
-    <!-- 1. SECCIÓN REPRODUCTOR CENTRAL DE VÍDEO -->
-    <section id="player-section" class="player-wrapper size-normal">
-      <div class="video-container">
-        <video id="main-video-player" class="player_video" poster="images/poster_default.jpg"></video>
-        
-        <!-- Controles del Reproductor -->
-        <div class="player_controls">
-          <div class="progress-bar-container">
-            <div id="video-progress" class="progress_filled"></div>
-          </div>
-          
-          <div class="controls-left">
-            <button id="btn-play-video" class="player_button"><i class="fa-solid fa-play"></i></button>
-            <button id="btn-mute-video" class="player_button"><i class="fa-solid fa-volume-high"></i></button>
-            <input type="range" id="video-volume" class="player_slider" min="0" max="1" step="0.05" value="0.8" />
-            <button onclick="skipVideo(-10)" class="player_button">« 10s</button>
-            <button onclick="skipVideo(25)" class="player_button">25s »</button>
-          </div>
+        // 1. Seleccionamos al usuario actual (ej. Ivan Guillermo)
+        const usuarioActual = data.usuarios.find(u => u.correo === "ivan@gmail.com") || data.usuarios[0];
+        document.getElementById("user-name").textContent = `Perfil de: ${usuarioActual.nombre}`;
 
-          <div class="controls-right">
-            <!-- Alternar tamaño del reproductor -->
-            <button id="btn-toggle-size" title="Cambiar tamaño" class="player_button"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></button>
-            <!-- Ocultar/Mostrar panel lateral de episodios -->
-            <button id="btn-toggle-sideview" title="Episodios" class="player_button"><i class="fa-solid fa-list-ul"></i></button>
-            <!-- Pantalla completa -->
-            <button id="btn-fullscreen" title="Pantalla completa" class="player_button"><i class="fa-solid fa-expand"></i></button>
-          </div>
-        </div>
-      </div>
+        // 2. Convertimos la cadena de la fórmula "mov_01,mov_02" en un Array de JavaScript
+        const favIds = usuarioActual.peliculas_fav ? usuarioActual.peliculas_fav.split(",") : [];
 
-      <!-- PANEL LATERAL DE EPISODIOS (Ocultable) -->
-      <aside id="sidevideoplayer" class="sidebar-episodes hidden">
-        <header class="episodes-header">
-          Episodios: <span id="current-media-title">Selecciona una serie</span>
-        </header>
-        <ul id="episodios-list" class="episodes-body">
-          <li class="empty-msg">No hay serie cargada</li>
-        </ul>
-      </aside>
-    </section>
+        // 3. Cruzamos los IDs con la pestaña Cat_Peliculas
+        const pelisFavoritas = favIds.map(id => {
+          return data.cat_peliculas.find(pelicula => pelicula.id === id.trim());
+        }).filter(Boolean); // Filtra por si algún ID está vacío
 
-    <!-- 2. PASARELAS DE TARJETAS (TOP 10 FILMS, SERIES, ANIMES) -->
-    <section id="cinema" class="media-section">
-      
-      <!-- Top 10 Películas -->
-      <div class="carousel-container" id="films">
-        <h2 class="secTit">Top 10 Películas Favoritas</h2>
-        <div class="cards-carousel" id="carousel-movies">
-          <!-- Tarjetas generadas dinámicamente -->
-        </div>
-      </div>
+        // 4. Renderizamos en el DOM
+        const container = document.getElementById("fav-movies");
+        container.innerHTML = "";
 
-      <!-- Top 10 Series -->
-      <div class="carousel-container" id="series">
-        <h2 class="secTit">Top 10 Series Favoritas</h2>
-        <div class="cards-carousel" id="carousel-series">
-          <!-- Tarjetas generadas dinámicamente -->
-        </div>
-      </div>
+        pelisFavoritas.forEach(pelicula => {
+          container.innerHTML += `
+            <div class="card">
+              <img src="${pelicula.poster}" alt="${pelicula.nombre}">
+              <h4>${pelicula.nombre}</h4>
+              <p>${pelicula.genero} • ${pelicula.year}</p>
+            </div>
+          `;
+        });
 
-      <!-- Top 10 Animes -->
-      <div class="carousel-container" id="animes">
-        <h2 class="secTit">Top 10 Animes Favoritos</h2>
-        <div class="cards-carousel" id="carousel-animes">
-          <!-- Tarjetas generadas dinámicamente -->
-        </div>
-      </div>
-    </section>
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+        document.getElementById("user-name").textContent = "Error al cargar los datos.";
+      }
+    }
 
-    <!-- 3. MÚSICA & TABLA DE CANCIONES (TOP 35) -->
-    <section id="musica" class="music-section">
-      <h2>Mis 35 Canciones Favoritas</h2>
-      <div class="table-responsive">
-        <table class="song_table">
-          <thead>
-            <tr>
-              <th style="width: 5%">#</th>
-              <th style="width: 8%">Play</th>
-              <th>Título</th>
-              <th>Artista</th>
-              <th>Álbum</th>
-            </tr>
-          </thead>
-          <tbody id="mis_canciones">
-            <!-- Filas dinámicas generadas desde JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- 4. PANELES EXPANDIBLES (TOP 5 BANDAS) -->
-      <h2 class="secTit">Top 5 Bandas Favoritas</h2>
-      <div class="bands-accordion" id="bandas-accordion">
-        <!-- Generado dinámicamente (Accordion / Paneles) -->
-      </div>
-
-      <!-- 5. ÁLBUMES FAVORITOS (REPRODUCEN EN REPRODUCTOR PRINCIPAL CON PORTADA FIJA) -->
-      <h2 class="secTit">Álbumes Favoritos</h2>
-      <div id="albums-grid" class="albums-grid">
-        <!-- Grid de portadas de álbumes -->
-      </div>
-    </section>
-
-    <!-- 6. LITERATURA FAVORITA -->
-    <section id="literatura" class="literature-section">
-      <h2 class="secTit">Libros Favoritos</h2>
-      <div id="fav-books-grid" class="books-grid">
-        <!-- Tarjetas de Libros con enlaces de descarga/lectura -->
-      </div>
-    </section>
-
-    <!-- 7. PERSONAJES FAVORITOS (DEPORTES, ARTE, HISTORIA) -->
-    <section id="deportes" class="favorites-gallery">
-      <h2 class="secTit">Personajes e Íconos Favoritos</h2>
-      <div id="gallery-container" class="sports-gallery">
-        <!-- Imágenes de personajes -->
-      </div>
-    </section>
-  </main>
-
-  <!-- REPRODUCTOR DE AUDIO FIJO EN FOOTER -->
-  <footer id="music_player" class="global-audio-player">
-    <div class="audio-info">
-      <i class="fa-solid fa-music"></i>
-      <div>
-        <strong id="song_on_title">Sin reproducción</strong>
-        <span id="song_on_artist">---</span>
-      </div>
-    </div>
-
-    <div class="audio-controls-center">
-      <div class="audio-buttons">
-        <button id="rep_shuffle-btn" class="btn-icon"><i class="fa-solid fa-shuffle"></i></button>
-        <button id="rep_back-btn" class="btn-icon"><i class="fa-solid fa-backward-step"></i></button>
-        <button id="rep_play-btn" class="btn-icon play-main"><i class="fa-solid fa-play"></i></button>
-        <button id="rep_forward-btn" class="btn-icon"><i class="fa-solid fa-forward-step"></i></button>
-        <button id="rep_repeat-btn" class="btn-icon"><i class="fa-solid fa-repeat"></i></button>
-      </div>
-      <div class="audio-progress-bar">
-        <span id="audio-current-time">00:00</span>
-        <progress id="progress_audio" value="0" max="100"></progress>
-        <span id="audio-duration-time">00:00</span>
-      </div>
-    </div>
-
-    <div class="audio-volume-container">
-      <i class="fa-solid fa-volume-high"></i>
-      <progress id="progress_volume" value="70" max="100"></progress>
-    </div>
-
-    <audio id="audio-element"></audio>
-  </footer>
-
-  <script src="js/auth.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/app.js"></script>
+    cargarSpotiflix();
+  </script>
 </body>
 </html>
