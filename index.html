@@ -3,26 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotiflix - Demo</title>
+  <title>Spotiflix - Carrusel</title>
   <style>
-    body { font-family: sans-serif; background: #141414; color: #fff; padding: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
-    .card { background: #222; border-radius: 8px; overflow: hidden; text-align: center; padding-bottom: 10px; }
-    .card img { width: 100%; height: 220px; object-fit: cover; }
-    .card h4 { margin: 10px 0 5px; font-size: 14px; }
-    .card p { font-size: 12px; color: #aaa; margin: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #141414;
+      color: #fff;
+      padding: 40px 20px;
+    }
+
+    h2 { margin-bottom: 20px; }
+
+    /* Contenedor Principal del Carrusel */
+    .carousel-container {
+      position: relative;
+      max-width: 1080px; /* Ancho ajustado para 6 tarjetas de 160px + gaps */
+      margin: 0 auto;
+    }
+
+    /* Track deslizable */
+    .carousel-track {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 10px 0;
+    }
+
+    /* Ocultar barra de desplazamiento visual */
+    .carousel-track::-webkit-scrollbar {
+      display: none;
+    }
+    .carousel-track {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Tarjeta individual (6 visibles a la vez) */
+    .card {
+      min-width: 160px;
+      max-width: 160px;
+      background: #222;
+      border-radius: 8px;
+      overflow: hidden;
+      text-align: center;
+      padding-bottom: 10px;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .card h4 {
+      margin: 10px 8px 5px;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card p {
+      font-size: 11px;
+      color: #aaa;
+      margin: 0;
+    }
+
+    /* Botones de Navegación */
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(229, 9, 20, 0.9);
+    }
+
+    .prev-btn { left: -20px; }
+    .next-btn { right: -20px; }
   </style>
 </head>
 <body>
 
-  <div id="user-profile">
-    <h2 id="user-name">Cargando usuario...</h2>
-    <h3>Películas Favoritas</h3>
-    <div id="fav-movies" class="grid"></div>
+  <h2 id="user-name">Cargando usuario...</h2>
+
+  <div class="carousel-container">
+    <button class="nav-btn prev-btn" onclick="moverCarrusel(-1)">&#10094;</button>
+    
+    <div id="fav-movies" class="carousel-track"></div>
+    
+    <button class="nav-btn next-btn" onclick="moverCarrusel(1)">&#10095;</button>
   </div>
 
   <script>
-    // Reemplaza esta URL con la Web App URL que te da Apps Script al desplegar
+    // Reemplaza esta constante con tu Web App URL desplegada en Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
 
     async function cargarSpotiflix() {
@@ -30,19 +125,19 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // 1. Seleccionamos al usuario actual (ej. Ivan Guillermo)
+        // 1. Obtener datos del usuario activo
         const usuarioActual = data.usuarios.find(u => u.correo === "ivan@gmail.com") || data.usuarios[0];
-        document.getElementById("user-name").textContent = `Perfil de: ${usuarioActual.nombre}`;
+        document.getElementById("user-name").textContent = `Películas favoritas de ${usuarioActual.nombre}`;
 
-        // 2. Convertimos la cadena de la fórmula "mov_01,mov_02" en un Array de JavaScript
+        // 2. Extraer los IDs delimitados por coma de la fórmula
         const favIds = usuarioActual.peliculas_fav ? usuarioActual.peliculas_fav.split(",") : [];
 
-        // 3. Cruzamos los IDs con la pestaña Cat_Peliculas
+        // 3. Buscar las películas correspondientes en el catálogo
         const pelisFavoritas = favIds.map(id => {
           return data.cat_peliculas.find(pelicula => pelicula.id === id.trim());
-        }).filter(Boolean); // Filtra por si algún ID está vacío
+        }).filter(Boolean);
 
-        // 4. Renderizamos en el DOM
+        // 4. Inyectar las tarjetas en el track
         const container = document.getElementById("fav-movies");
         container.innerHTML = "";
 
@@ -60,6 +155,18 @@
         console.error("Error al cargar los datos:", error);
         document.getElementById("user-name").textContent = "Error al cargar los datos.";
       }
+    }
+
+    // Función para desplazar el carrusel mediante los botones
+    function moverCarrusel(direccion) {
+      const track = document.getElementById("fav-movies");
+      // Ancho de tarjeta (160px) + gap (15px) = 175px por elemento
+      const desplazamiento = 175 * 3; // Desplaza 3 elementos por clic
+      
+      track.scrollBy({
+        left: direccion * desplazamiento,
+        behavior: 'smooth'
+      });
     }
 
     cargarSpotiflix();
