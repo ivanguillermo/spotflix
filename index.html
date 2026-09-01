@@ -3,222 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotiflix - Showcase</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #141414;
-      color: #fff;
-      padding: 40px 20px;
-    }
-
-    .user-header {
-      max-width: 1080px;
-      margin: 0 auto 30px auto;
-    }
-
-    .section-title {
-      max-width: 1080px;
-      margin: 30px auto 10px auto;
-      font-size: 20px;
-      color: #e5e5e5;
-    }
-
-    /* Contenedor Principal de los Carruseles */
-    .carousel-container {
-      position: relative;
-      max-width: 1080px;
-      margin: 0 auto 40px auto;
-    }
-
-    /* Track deslizable */
-    .carousel-track {
-      display: flex;
-      gap: 15px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding: 10px 0;
-    }
-
-    /* Ocultar barra de desplazamiento */
-    .carousel-track::-webkit-scrollbar {
-      display: none;
-    }
-    .carousel-track {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* Tarjeta de Contenido */
-    .card {
-      min-width: 160px;
-      max-width: 160px;
-      background: #222;
-      border-radius: 8px;
-      overflow: hidden;
-      text-align: center;
-      padding-bottom: 10px;
-      flex-shrink: 0;
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: scale(1.03);
-    }
-
-    .card img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-    }
-
-    .card h4 {
-      margin: 10px 8px 5px;
-      font-size: 13px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .card p {
-      font-size: 11px;
-      color: #aaa;
-      margin: 0;
-    }
-
-    /* Botones de Navegación */
-    .nav-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      border: none;
-      font-size: 24px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease;
-    }
-
-    .nav-btn:hover {
-      background: rgba(229, 9, 20, 0.9);
-    }
-
-    .prev-btn { left: -20px; }
-    .next-btn { right: -20px; }
-  </style>
+  <title>Spotiflix</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="user-header">
-    <h2 id="user-name">Cargando usuario...</h2>
-  </div>
+  <!-- Encabezado de Usuario -->
+  <header class="user-header">
+    <h2 id="user-name">Cargando perfil...</h2>
+  </header>
 
-  <!-- PASARELA 1: PELÍCULAS -->
-  <h3 class="section-title">Películas Favoritas</h3>
-  <div class="carousel-container">
-    <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-movies', -1)">&#10094;</button>
-    <div id="fav-movies" class="carousel-track"></div>
-    <button class="nav-btn next-btn" onclick="moverCarrusel('fav-movies', 1)">&#10095;</button>
-  </div>
+  <main class="main-content">
+    <!-- PASARELA: PELÍCULAS -->
+    <section class="section-container">
+      <h3 class="section-title">Películas Favoritas</h3>
+      <div class="carousel-container">
+        <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-movies', -1)" aria-label="Anterior">&#10094;</button>
+        <div id="fav-movies" class="carousel-track"></div>
+        <button class="nav-btn next-btn" onclick="moverCarrusel('fav-movies', 1)" aria-label="Siguiente">&#10095;</button>
+      </div>
+    </section>
 
-  <!-- PASARELA 2: SERIES -->
-  <h3 class="section-title">Series Favoritas</h3>
-  <div class="carousel-container">
-    <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-series', -1)">&#10094;</button>
-    <div id="fav-series" class="carousel-track"></div>
-    <button class="nav-btn next-btn" onclick="moverCarrusel('fav-series', 1)">&#10095;</button>
-  </div>
+    <!-- PASARELA: SERIES -->
+    <section class="section-container">
+      <h3 class="section-title">Series Favoritas</h3>
+      <div class="carousel-container">
+        <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-series', -1)" aria-label="Anterior">&#10094;</button>
+        <div id="fav-series" class="carousel-track"></div>
+        <button class="nav-btn next-btn" onclick="moverCarrusel('fav-series', 1)" aria-label="Siguiente">&#10095;</button>
+      </div>
+    </section>
+  </main>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
-
-    async function cargarSpotiflix() {
-  try {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-
-    // 1. Obtener datos del usuario (validando estructuras)
-    const usuarioActual = (data.usuarios && data.usuarios.length > 0) 
-      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivanglopezp@gmail.com") || data.usuarios[0])
-      : null;
-
-    if (usuarioActual && usuarioActual.nombre) {
-      document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
-    } else {
-      document.getElementById("user-name").textContent = "Perfil de Usuario";
-    }
-
-    // 2. Renderizar Películas Favoritas
-    if (usuarioActual && usuarioActual.peliculas_fav && data.cat_peliculas) {
-      const peliIds = usuarioActual.peliculas_fav.toString().split(",");
-      const pelisFavoritas = peliIds.map(id => {
-        return data.cat_peliculas.find(p => p.id && p.id.toString().trim() === id.trim());
-      }).filter(Boolean);
-
-      renderCards("fav-movies", pelisFavoritas, false);
-    }
-
-    // 3. Renderizar Series Favoritas
-    if (usuarioActual && usuarioActual.series_fav && data.cat_series) {
-      const serieIds = usuarioActual.series_fav.toString().split(",");
-      const seriesFavoritas = serieIds.map(id => {
-        return data.cat_series.find(s => s.id && s.id.toString().trim() === id.trim());
-      }).filter(Boolean);
-
-      renderCards("fav-series", seriesFavoritas, true);
-    }
-
-  } catch (error) {
-    console.error("Error al cargar los datos:", error);
-    // Solo muestra error si realmente falló el fetch
-    document.getElementById("user-name").textContent = "Error al conectar con la API.";
-  }
-}
-
-    // Función auxiliar para renderizar tarjetas en cualquier track
-    function renderCards(containerId, items, esSerie = false) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = "";
-
-      if (items.length === 0) {
-        container.innerHTML = `<p style="color: #888;">No hay elementos seleccionados.</p>`;
-        return;
-      }
-
-      items.forEach(item => {
-        const subtitulo = esSerie 
-          ? `${item.temporada} Temp. • ${item.genero}`
-          : `${item.genero} • ${item.year}`;
-
-        container.innerHTML += `
-          <div class="card">
-            <img src="${item.poster}" alt="${item.nombre}">
-            <h4>${item.nombre}</h4>
-            <p>${subtitulo}</p>
-          </div>
-        `;
-      });
-    }
-
-    // Función reutilizable para mover cualquier carrusel según su ID
-    function moverCarrusel(containerId, direccion) {
-      const track = document.getElementById(containerId);
-      const desplazamiento = 175 * 3; // Mueve 3 tarjetas a la vez
-      
-      track.scrollBy({
-        left: direccion * desplazamiento,
-        behavior: 'smooth'
-      });
-    }
-
-    cargarSpotiflix();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
