@@ -8,7 +8,7 @@ async function cargarSpotiflix() {
     const data = await res.json();
 
     const usuarioActual = (data.usuarios && data.usuarios.length > 0)
-      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivan@gmail.com") || data.usuarios[0])
+      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivanglopezp@gmail.com") || data.usuarios[0])
       : null;
 
     if (usuarioActual && usuarioActual.nombre) {
