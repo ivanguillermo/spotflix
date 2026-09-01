@@ -145,7 +145,7 @@
         const data = await res.json();
 
         // 1. Obtener datos del usuario activo
-        const usuarioActual = data.usuarios.find(u => u.correo === "ivan@gmail.com") || data.usuarios[0];
+        const usuarioActual = data.usuarios.find(u => u.correo === "ivanglopezp@gmail.com") || data.usuarios[0];
         document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
 
         // 2. Renderizar Películas Favoritas
