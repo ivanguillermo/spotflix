@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotiflix - Carrusel</title>
+  <title>Spotiflix - Showcase</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,13 +12,23 @@
       padding: 40px 20px;
     }
 
-    h2 { margin-bottom: 20px; }
+    .user-header {
+      max-width: 1080px;
+      margin: 0 auto 30px auto;
+    }
 
-    /* Contenedor Principal del Carrusel */
+    .section-title {
+      max-width: 1080px;
+      margin: 30px auto 10px auto;
+      font-size: 20px;
+      color: #e5e5e5;
+    }
+
+    /* Contenedor Principal de los Carruseles */
     .carousel-container {
       position: relative;
-      max-width: 1080px; /* Ancho ajustado para 6 tarjetas de 160px + gaps */
-      margin: 0 auto;
+      max-width: 1080px;
+      margin: 0 auto 40px auto;
     }
 
     /* Track deslizable */
@@ -30,7 +40,7 @@
       padding: 10px 0;
     }
 
-    /* Ocultar barra de desplazamiento visual */
+    /* Ocultar barra de desplazamiento */
     .carousel-track::-webkit-scrollbar {
       display: none;
     }
@@ -39,7 +49,7 @@
       scrollbar-width: none;
     }
 
-    /* Tarjeta individual (6 visibles a la vez) */
+    /* Tarjeta de Contenido */
     .card {
       min-width: 160px;
       max-width: 160px;
@@ -106,18 +116,27 @@
 </head>
 <body>
 
-  <h2 id="user-name">Cargando usuario...</h2>
+  <div class="user-header">
+    <h2 id="user-name">Cargando usuario...</h2>
+  </div>
 
+  <!-- PASARELA 1: PELÍCULAS -->
+  <h3 class="section-title">Películas Favoritas</h3>
   <div class="carousel-container">
-    <button class="nav-btn prev-btn" onclick="moverCarrusel(-1)">&#10094;</button>
-    
+    <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-movies', -1)">&#10094;</button>
     <div id="fav-movies" class="carousel-track"></div>
-    
-    <button class="nav-btn next-btn" onclick="moverCarrusel(1)">&#10095;</button>
+    <button class="nav-btn next-btn" onclick="moverCarrusel('fav-movies', 1)">&#10095;</button>
+  </div>
+
+  <!-- PASARELA 2: SERIES -->
+  <h3 class="section-title">Series Favoritas</h3>
+  <div class="carousel-container">
+    <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-series', -1)">&#10094;</button>
+    <div id="fav-series" class="carousel-track"></div>
+    <button class="nav-btn next-btn" onclick="moverCarrusel('fav-series', 1)">&#10095;</button>
   </div>
 
   <script>
-    // Reemplaza esta constante con tu Web App URL desplegada en Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
 
     async function cargarSpotiflix() {
@@ -127,29 +146,23 @@
 
         // 1. Obtener datos del usuario activo
         const usuarioActual = data.usuarios.find(u => u.correo === "ivan@gmail.com") || data.usuarios[0];
-        document.getElementById("user-name").textContent = `Películas favoritas de ${usuarioActual.nombre}`;
+        document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
 
-        // 2. Extraer los IDs delimitados por coma de la fórmula
-        const favIds = usuarioActual.peliculas_fav ? usuarioActual.peliculas_fav.split(",") : [];
-
-        // 3. Buscar las películas correspondientes en el catálogo
-        const pelisFavoritas = favIds.map(id => {
-          return data.cat_peliculas.find(pelicula => pelicula.id === id.trim());
+        // 2. Renderizar Películas Favoritas
+        const peliIds = usuarioActual.peliculas_fav ? usuarioActual.peliculas_fav.split(",") : [];
+        const pelisFavoritas = peliIds.map(id => {
+          return data.cat_peliculas.find(p => p.id === id.trim());
         }).filter(Boolean);
 
-        // 4. Inyectar las tarjetas en el track
-        const container = document.getElementById("fav-movies");
-        container.innerHTML = "";
+        renderCards("fav-movies", pelisFavoritas);
 
-        pelisFavoritas.forEach(pelicula => {
-          container.innerHTML += `
-            <div class="card">
-              <img src="${pelicula.poster}" alt="${pelicula.nombre}">
-              <h4>${pelicula.nombre}</h4>
-              <p>${pelicula.genero} • ${pelicula.year}</p>
-            </div>
-          `;
-        });
+        // 3. Renderizar Series Favoritas
+        const serieIds = usuarioActual.series_fav ? usuarioActual.series_fav.split(",") : [];
+        const seriesFavoritas = serieIds.map(id => {
+          return data.cat_series.find(s => s.id === id.trim());
+        }).filter(Boolean);
+
+        renderCards("fav-series", seriesFavoritas, true);
 
       } catch (error) {
         console.error("Error al cargar los datos:", error);
@@ -157,11 +170,35 @@
       }
     }
 
-    // Función para desplazar el carrusel mediante los botones
-    function moverCarrusel(direccion) {
-      const track = document.getElementById("fav-movies");
-      // Ancho de tarjeta (160px) + gap (15px) = 175px por elemento
-      const desplazamiento = 175 * 3; // Desplaza 3 elementos por clic
+    // Función auxiliar para renderizar tarjetas en cualquier track
+    function renderCards(containerId, items, esSerie = false) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+
+      if (items.length === 0) {
+        container.innerHTML = `<p style="color: #888;">No hay elementos seleccionados.</p>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const subtitulo = esSerie 
+          ? `${item.temporada} Temp. • ${item.genero}`
+          : `${item.genero} • ${item.year}`;
+
+        container.innerHTML += `
+          <div class="card">
+            <img src="${item.poster}" alt="${item.nombre}">
+            <h4>${item.nombre}</h4>
+            <p>${subtitulo}</p>
+          </div>
+        `;
+      });
+    }
+
+    // Función reutilizable para mover cualquier carrusel según su ID
+    function moverCarrusel(containerId, direccion) {
+      const track = document.getElementById(containerId);
+      const desplazamiento = 175 * 3; // Mueve 3 tarjetas a la vez
       
       track.scrollBy({
         left: direccion * desplazamiento,
