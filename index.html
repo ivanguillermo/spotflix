@@ -9,15 +9,20 @@
 <body>
 
   <header class="user-header">
-    <h2 id="user-name">Cargando perfil...</h2>
+    <h2 id="user-name">Perfil de Usuario</h2>
   </header>
 
-  <!-- REPRODUCTOR PRINCIPAL SUPERIOR -->
-  <section class="hero-player-container">
-    <div id="featured-player" class="hero-player">
-      <div class="player-placeholder">
-        <p>Selecciona una película o serie para reproducir</p>
-      </div>
+  <section class="player-section">
+    <div class="video-wrapper">
+      <video id="main-video-player" controls poster="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1200">
+        <source id="video-source" src="" type="video/mp4">
+        Tu navegador no soporta el reproductor de video.
+      </video>
+    </div>
+    
+    <div class="video-details">
+      <h2 id="playing-title">Selecciona un título para reproducir</h2>
+      <p id="playing-info" class="playing-info">Explora las listas a continuación para ver tráileres y episodios.</p>
     </div>
   </section>
 
@@ -39,7 +44,38 @@
         <button class="nav-btn next-btn" onclick="moverCarrusel('fav-series', 1)" aria-label="Siguiente">&#10095;</button>
       </div>
     </section>
+
+    <div class="songs-banner">
+      <h1>Mis Canciones</h1>
+    </div>
+
+    <section class="section-container">
+      <table class="songs-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">Play</th>
+            <th>Nombre</th>
+            <th>Artista</th>
+            <th>Álbum</th>
+          </tr>
+        </thead>
+        <tbody id="songs-list">
+          </tbody>
+      </table>
+    </section>
   </main>
+
+  <div class="audio-player-bar">
+    <div class="now-playing-info">
+      <span class="now-playing-label">Now Playing</span>
+      <h4 id="audio-track-title">Sin reproducción</h4>
+      <p id="audio-track-artist">-</p>
+    </div>
+
+    <div class="audio-controls">
+      <audio id="main-audio-player" controls src=""></audio>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
