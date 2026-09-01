@@ -1,4 +1,5 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxEC6qGG_MuO3bvBWNsd0HWM-NHc5vRBBX4T3dbkWgnuX1JOz5nU68hm3UDZYqi1FeG/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyz-T_5DncuFoHlnOXTIM813hxVpNYczIQdZ0rxFo25t2xAsk21MswDbrYEnZ2eutKC/exec";
+
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
 async function cargarSpotiflix() {
