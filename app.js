@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwUmcwdjy72uilV36CcrH6k9o0rxrRXX2lTuAbMQRG-rZhI4l5vQyB88PBkuBkD5DQY/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby1icFrmwb2tX8VkvrVoW_DuyvTaBtQXLkfaPgmPxNFJxfT8WkBDDdriEmevaMhfVAt/exec";
 
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
@@ -78,6 +78,20 @@ async function cargarSpotiflix() {
 
     if (data.cat_deportes) {
       renderDeportes(data.cat_deportes);
+    }
+
+    if (usuarioActual && usuarioActual.albums && data.cat_albums) {
+      // Obtener los 15 IDs separados por comas
+      const idsAlbumsFav = usuarioActual.albums.toString().split(",").map(id => id.trim());
+    
+      // Filtrar los álbumes respetando el orden exacto especificado en la celda del usuario
+      const albumsFavoritos = idsAlbumsFav.map(id => {
+        return data.cat_albums.find(a => a.id && a.id.toString().trim() === id);
+      }).filter(Boolean).slice(0, 15); // Garantiza un máximo de 15
+    
+      renderAlbums(albumsFavoritos);
+    } else if (data.cat_albums) {
+      renderAlbums(data.cat_albums.slice(0, 15));
     }
 
   } catch (error) {
@@ -352,6 +366,49 @@ function renderDeportes(deportistas) {
     });
 
     stage.appendChild(img);
+  });
+}
+function renderAlbums(albums) {
+  const grid = document.getElementById("albums-grid");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  albums.forEach((album, index) => {
+    if (!album.poster) return;
+
+    const card = document.createElement("div");
+    
+    // Los primeros 4 álbumes (índices 0, 1, 2 y 3) reciben la clase 'item-big'
+    const esTop4 = index < 4;
+    card.className = `album-card ${esTop4 ? 'item-big' : ''}`;
+
+    card.innerHTML = `
+      <img src="${album.poster.trim()}" alt="${album.nombre || 'Álbum'}" loading="lazy">
+      <div class="album-tag">
+        <span class="album-title">${album.nombre || ''}</span>
+        <span class="album-artist">${album.artista || ''}</span>
+        <span class="album-year">${album.year || ''}</span>
+      </div>
+    `;
+
+    // REPRODUCCIÓN DE AUDIO AL HACER CLIC
+    card.addEventListener("click", () => {
+      const mainAudioPlayer = document.getElementById("main-audio-player");
+      const titleElem = document.getElementById("audio-track-title");
+
+      if (album.audio && mainAudioPlayer) {
+        mainAudioPlayer.src = album.audio.trim();
+        mainAudioPlayer.currentTime = 0;
+        mainAudioPlayer.play();
+
+        if (titleElem) {
+          titleElem.textContent = `${album.nombre} - ${album.artista}`;
+        }
+      }
+    });
+
+    grid.appendChild(card);
   });
 }
 
