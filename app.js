@@ -2,17 +2,27 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzxg4H-aEBh1NC6hn1FzxgS
 
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
+
 async function cargarSpotiflix() {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
 
     const usuarioActual = (data.usuarios && data.usuarios.length > 0)
-      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivan@gmail.com") || data.usuarios[0])
+      ? (data.usuarios.find(u => u.correo && u.correo.trim().toLowerCase() === "ivanglopezp@gmail.com") || data.usuarios[0])
       : null;
 
-    if (usuarioActual && usuarioActual.nombre) {
-      document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
+    if (usuarioActual) {
+      // Cargar foto de perfil en la navbar
+      const avatarImg = document.getElementById("user-avatar");
+      if (usuarioActual.foto_perfil && usuarioActual.foto_perfil.trim() !== "") {
+        avatarImg.src = usuarioActual.foto_perfil;
+        avatarImg.style.display = "block";
+      }
+
+      if (usuarioActual.nombre) {
+        document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
+      }
     }
 
     // 1. Películas
@@ -32,7 +42,6 @@ async function cargarSpotiflix() {
       const seriesFavoritas = serieIds.map(id => {
         return data.cat_series.find(s => s.id && s.id.toString().trim() === id.trim());
       }).filter(Boolean);
-
       renderCards("fav-series", seriesFavoritas, true);
     }
 
@@ -42,7 +51,6 @@ async function cargarSpotiflix() {
       const cancionesFavoritas = cancionIds.map(id => {
         return data.cat_canciones.find(c => c.id && c.id.toString().trim() === id.trim());
       }).filter(Boolean);
-
       renderSongs(cancionesFavoritas);
     } 
     // 3. Libros
@@ -50,15 +58,12 @@ async function cargarSpotiflix() {
       const libroIds = usuarioActual.libros_fav.toString().split(",");
       const librosFavoritos = libroIds.map(id => {
         return data.cat_libros.find(l => l.id && l.id.toString().trim() === id.trim());
-      }).filter(Boolean);
-    
+      }).filter(Boolean);    
       renderBooks("fav-books", librosFavoritos);
-    } 
-    
+    }   
     else if (data.cat_libros) {
-  renderBooks("fav-books", data.cat_libros);
-}
-
+      renderBooks("fav-books", data.cat_libros);
+    }
       
     else if (data.cat_canciones) {
       // Fallback: mostrar todo el catálogo de canciones si no hay filtro de favoritas
