@@ -44,7 +44,23 @@ async function cargarSpotiflix() {
       }).filter(Boolean);
 
       renderSongs(cancionesFavoritas);
-    } else if (data.cat_canciones) {
+    } 
+    // 3. Libros
+    if (usuarioActual && usuarioActual.libros_fav && data.cat_libros) {
+      const libroIds = usuarioActual.libros_fav.toString().split(",");
+      const librosFavoritos = libroIds.map(id => {
+        return data.cat_libros.find(l => l.id && l.id.toString().trim() === id.trim());
+      }).filter(Boolean);
+    
+      renderBooks("fav-books", librosFavoritos);
+    } 
+    
+    else if (data.cat_libros) {
+  renderBooks("fav-books", data.cat_libros);
+}
+
+      
+    else if (data.cat_canciones) {
       // Fallback: mostrar todo el catálogo de canciones si no hay filtro de favoritas
       renderSongs(data.cat_canciones);
     }
@@ -119,6 +135,30 @@ function renderSongs(canciones) {
     });
 
     tbody.appendChild(tr);
+  });
+}
+
+function renderBooks(containerId, libros) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  if (!libros || libros.length === 0) {
+    container.innerHTML = `<p style="color: #888;">No hay libros disponibles.</p>`;
+    return;
+  }
+
+  libros.forEach(libro => {
+    const card = document.createElement("article");
+    card.className = "book-card";
+
+    const linkPdf = libro.link || libro.pdf || "#";
+
+    card.innerHTML = `
+      <img src="${libro.poster}" alt="${libro.nombre}" loading="lazy">
+      <a href="${linkPdf}" target="_blank" rel="noopener noreferrer" class="btn-read">Leer</a>
+    `;
+
+    container.appendChild(card);
   });
 }
 
