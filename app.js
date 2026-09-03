@@ -213,11 +213,6 @@ function renderBandas(bandas, catálogoCanciones) {
 
   container.innerHTML = "";
 
-  if (!bandas || bandas.length === 0) {
-    container.innerHTML = `<p style="color: #888; text-align: center; width: 100%; padding-top: 20px;">No hay bandas seleccionadas.</p>`;
-    return;
-  }
-
   bandas.forEach((banda, index) => {
     const panel = document.createElement("div");
     panel.className = `panel panel${index + 1}`;
@@ -226,14 +221,18 @@ function renderBandas(bandas, catálogoCanciones) {
       panel.style.backgroundImage = `url('${banda.photo.trim()}')`;
     }
 
-    // Extraer hasta 6 canciones asociadas a la banda
+    // Dividir nombre si tiene dos palabras (ej: "The Kooks" -> Top: "The", Bottom: "Kooks")
+    const palabras = (banda.nombre || 'Banda').split(" ");
+    const textoTop = palabras[0] || "";
+    const textoBottom = palabras.slice(1).join(" ") || banda.Pais || "";
+
+    // Armar franjas de canciones (Box 1 a Box 7)
     let htmlCanciones = "";
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
       const nombreCancion = banda[`cancion_${i}`];
       const idCancion = banda[`cancion_${i}_id`];
 
       if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
-        // Buscar el MP3 real en el catálogo por id si existe
         const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
         const audioUrl = cancionObj ? (cancionObj.link || cancionObj.url || "") : "";
 
@@ -246,11 +245,11 @@ function renderBandas(bandas, catálogoCanciones) {
     }
 
     panel.innerHTML = `
-      <p>${banda.nombre || 'Banda'}</p>
+      <p>${textoTop}</p>
       <div class="centro">
         ${htmlCanciones}
       </div>
-      <p>${banda.Pais || ''}</p>
+      <p>${textoBottom}</p>
     `;
 
     container.appendChild(panel);
