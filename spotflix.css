@@ -530,3 +530,63 @@ body {
 .centro .box5 { background-color: #f99a0d; }              /* Naranja */
 .centro .box6 { background-color: #f9186b; }              /* Rojo/Rosado */
 .centro .box7 { background-color: #f6f9e7; color: #000; } /* Blanco/Amarillo claro */
+
+/* LIENZO DEPORTES */
+.deportes-container {
+  width: 100%;
+  height: 75vh;
+  background-color: #050505;
+  position: relative;
+  overflow: hidden;
+  margin: 30px 0;
+}
+
+.sports-stage {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Imagen principal/fondo grande (ej. Ballack / Grafitti rosa y azul) */
+  background-image: url('https://i.ibb.co/3kW2X9X/ballack-bg.png'); 
+  background-size: cover;
+  background-position: center bottom;
+}
+
+/* PERSONAJES CUTOUT (PNG) */
+.athlete-cutout {
+  position: absolute;
+  cursor: pointer;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
+  user-select: none;
+}
+
+/* EFECTO HOVER: Agrandamiento + Glow Neon */
+.athlete-cutout:hover {
+  transform: scale(1.08) translateY(-6px);
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.85)) drop-shadow(0 0 30px rgba(29, 185, 84, 0.6));
+  z-index: 99 !important;
+}
+
+/* TOOLTIP ESTILO SPOTIFLIX */
+.sports-tooltip {
+  position: absolute;
+  padding: 6px 14px;
+  background: rgba(18, 18, 18, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -120%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  z-index: 100;
+  white-space: nowrap;
+}
+
+.sports-tooltip.active {
+  opacity: 1;
+}
