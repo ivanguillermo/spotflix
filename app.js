@@ -76,6 +76,10 @@ async function cargarSpotiflix() {
       renderBandas(data.cat_bandas, data.cat_canciones || []);
     }
 
+    if (data.cat_deportes) {
+      renderDeportes(data.cat_deportes);
+    }
+
   } catch (error) {
     console.error("Error al cargar los datos:", error);
     document.getElementById("user-name").textContent = "Error al conectar con la API.";
@@ -297,6 +301,57 @@ function activarEventosPaneles() {
         }
       }
     });
+  });
+}
+
+function renderDeportes(deportistas) {
+  const stage = document.getElementById("sports-stage");
+  const tooltip = document.getElementById("deportes-tooltip");
+  if (!stage || !tooltip) return;
+
+  // Limpiar recortes previos si existen
+  stage.querySelectorAll('.athlete-cutout').forEach(el => el.remove());
+
+  deportistas.forEach(atleta => {
+    if (!atleta.photo) return;
+
+    const img = document.createElement("img");
+    img.src = atleta.photo.trim();
+    img.alt = atleta.nombre || "Deportista";
+    img.className = "athlete-cutout";
+
+    // Aplicar posicionamiento desde la hoja de cálculo
+    img.style.bottom = atleta.pos_bottom || "0%";
+    img.style.left = atleta.pos_left || "50%";
+    img.style.height = atleta.height || "70%";
+    img.style.zIndex = atleta.z_index || "5";
+
+    // HOVER: MOSTRAR Y MOVER TOOLTIP
+    img.addEventListener("mouseenter", () => {
+      tooltip.textContent = atleta.nombre || "Atleta";
+      tooltip.classList.add("active");
+    });
+
+    img.addEventListener("mousemove", (e) => {
+      const rect = stage.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y - 10}px`;
+    });
+
+    img.addEventListener("mouseleave", () => {
+      tooltip.classList.remove("active");
+    });
+
+    // CLICK: ABRIR LINK (WIKIPEDIA / EXTERNO)
+    img.addEventListener("click", () => {
+      const url = atleta.link || `https://es.wikipedia.org/wiki/${encodeURIComponent(atleta.nombre)}`;
+      window.open(url, "_blank");
+    });
+
+    stage.appendChild(img);
   });
 }
 
