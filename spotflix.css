@@ -590,3 +590,95 @@ body {
 .sports-tooltip.active {
   opacity: 1;
 }
+
+/* CONTAINER Y GRID DE ÁLBUMES */
+.albums-container {
+  padding: 30px 0;
+  background-color: #000;
+}
+
+.albums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-auto-rows: 180px;
+  grid-auto-flow: dense;
+  gap: 12px;
+}
+
+/* CARTA DE ÁLBUM */
+.album-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #111;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* LOS PRIMEROS 4 ÁLBUMES LLEVAN ESTA CLASE (4 VECES MÁS GRANDES) */
+.album-card.item-big {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.album-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.album-card:hover img {
+  transform: scale(1.06);
+  filter: brightness(1.1);
+}
+
+/* ETIQUETA DIAGONAL EN EL CENTRO */
+.album-tag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  background: rgba(0, 0, 0, 0.88);
+  color: #fff;
+  padding: 8px 14px;
+  text-align: center;
+  border-radius: 2px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  width: 80%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.album-card:hover .album-tag {
+  transform: translate(-50%, -50%) rotate(-30deg) scale(1.08);
+  background: #1db954;
+  color: #000;
+}
+
+.album-tag .album-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.album-tag .album-artist {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.album-tag .album-year {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.75;
+}
+
+.album-card:hover .album-tag .album-year {
+  color: #000;
+}
