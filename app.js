@@ -31,7 +31,6 @@ async function cargarSpotiflix() {
       const pelisFavoritas = peliIds.map(id => {
         return data.cat_peliculas.find(p => p.id && p.id.toString().trim() === id.trim());
       }).filter(Boolean);
-
       renderCards("fav-movies", pelisFavoritas, false);
       if (pelisFavoritas.length > 0) reproducirElemento(pelisFavoritas[0], false);
     }
@@ -52,7 +51,10 @@ async function cargarSpotiflix() {
         return data.cat_canciones.find(c => c.id && c.id.toString().trim() === id.trim());
       }).filter(Boolean);
       renderSongs(cancionesFavoritas);
-    } 
+    } else if (data.cat_canciones) {
+      // Fallback: mostrar todo el catálogo de canciones si no hay filtro de favoritas
+      renderSongs(data.cat_canciones);
+    }
     // 3. Libros
     if (usuarioActual && usuarioActual.libros_fav && data.cat_libros) {
       const libroIds = usuarioActual.libros_fav.toString().split(",");
@@ -60,14 +62,18 @@ async function cargarSpotiflix() {
         return data.cat_libros.find(l => l.id && l.id.toString().trim() === id.trim());
       }).filter(Boolean);    
       renderBooks("fav-books", librosFavoritos);
-    }   
-    else if (data.cat_libros) {
+    } else if (data.cat_libros) {
       renderBooks("fav-books", data.cat_libros);
     }
-      
-    else if (data.cat_canciones) {
-      // Fallback: mostrar todo el catálogo de canciones si no hay filtro de favoritas
-      renderSongs(data.cat_canciones);
+          
+    if (usuarioActual && usuarioActual.bandas_fav && data.cat_bandas) {
+      const bandasIds = usuarioActual.bandas_fav.toString().split(",").map(id => id.trim());
+      const bandasFavoritas = bandasIds.map(id => {
+        return data.cat_bandas.find(b => b.id && b.id.toString().trim() === id);
+      }).filter(Boolean);
+      renderBandas(bandasFavoritas, data.cat_canciones || []);
+    } else if (data.cat_bandas) {
+      renderBandas(data.cat_bandas, data.cat_canciones || []);
     }
 
   } catch (error) {
@@ -200,6 +206,99 @@ function moverCarrusel(containerId, direccion) {
   const track = document.getElementById(containerId);
   if (!track) return;
   track.scrollBy({ left: direccion * 175 * 3, behavior: 'smooth' });
+}
+function renderBandas(bandas, catálogoCanciones) {
+  const container = document.getElementById("panels-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!bandas || bandas.length === 0) {
+    container.innerHTML = `<p style="color: #888; text-align: center; width: 100%; padding-top: 20px;">No hay bandas seleccionadas.</p>`;
+    return;
+  }
+
+  bandas.forEach((banda, index) => {
+    const panel = document.createElement("div");
+    panel.className = `panel panel${index + 1}`;
+
+    if (banda.photo && banda.photo.trim() !== "") {
+      panel.style.backgroundImage = `url('${banda.photo.trim()}')`;
+    }
+
+    // Extraer hasta 6 canciones asociadas a la banda
+    let htmlCanciones = "";
+    for (let i = 1; i <= 6; i++) {
+      const nombreCancion = banda[`cancion_${i}`];
+      const idCancion = banda[`cancion_${i}_id`];
+
+      if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
+        // Buscar el MP3 real en el catálogo por id si existe
+        const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
+        const audioUrl = cancionObj ? (cancionObj.link || cancionObj.url || "") : "";
+
+        htmlCanciones += `
+          <div class="box box${i}" data-src="${audioUrl}" data-title="${nombreCancion}">
+            ${nombreCancion}
+          </div>
+        `;
+      }
+    }
+
+    panel.innerHTML = `
+      <p>${banda.nombre || 'Banda'}</p>
+      <div class="centro">
+        ${htmlCanciones}
+      </div>
+      <p>${banda.Pais || ''}</p>
+    `;
+
+    container.appendChild(panel);
+  });
+
+  activarEventosPaneles();
+}
+
+function activarEventosPaneles() {
+  const paneletes = document.querySelectorAll('.panel');
+  const caja_colores = ['#ef1df3', '#5ae6e6', '#f99a0d', '#f9186b', '#42e25d', '#1db954'];
+
+  paneletes.forEach(panel => {
+    panel.addEventListener('click', function() {
+      this.classList.toggle('open');
+    });
+
+    panel.addEventListener('transitionend', function(e) {
+      if (e.propertyName.includes('flex')) {
+        this.classList.toggle('open-active');
+      }
+    });
+  });
+
+  const cajas = document.querySelectorAll('.centro .box');
+  cajas.forEach(caja => {
+    caja.addEventListener('click', function(e) {
+      e.stopPropagation(); // Evita cerrar/abrir el panel al hacer clic en la canción
+
+      const colorAzar = caja_colores[Math.floor(Math.random() * caja_colores.length)];
+      document.documentElement.style.setProperty('--color', colorAzar);
+
+      const src = this.getAttribute('data-src');
+      const title = this.getAttribute('data-title');
+      const mainAudioPlayer = document.getElementById('main-audio-player');
+
+      if (src && mainAudioPlayer) {
+        mainAudioPlayer.src = src;
+        mainAudioPlayer.currentTime = 0;
+        mainAudioPlayer.play();
+
+        const titleElem = document.getElementById('audio-track-title');
+        if (titleElem) {
+          titleElem.textContent = title || "Canción Seleccionada";
+        }
+      }
+    });
+  });
 }
 
 cargarSpotiflix();
