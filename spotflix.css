@@ -365,3 +365,54 @@ body {
   background-color: #ffffff;
   transform: scale(1.08);
 }
+
+/* ESTRUCTURA BRAND / AVATAR */
+.brand-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #1db954; /* Borde verde estilo Spotify */
+}
+
+/* CONTENEDOR CON SCROLL PARA LA TABLA DE CANCIONES */
+.table-scroll-container {
+  height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+}
+
+/* Estilos de la tabla ajustados para scroll */
+.songs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #0d0d0d;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+/* Header pegoso para que no desaparezca al hacer scroll */
+.songs-table th {
+  position: sticky;
+  top: 0;
+  background-color: #1db954;
+  color: #000000;
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 700;
+  z-index: 10;
+}
+
+.songs-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #1a1a1a;
+}
