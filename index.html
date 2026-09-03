@@ -4,15 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spotiflix</title>
-  <link rel="stylesheet" href="spotflix.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="brand-logo">IVANGUILLERMO</div>
+      <ul class="nav-links">
+        <li><a href="#player-section">Player</a></li>
+        <li><a href="#peliculas-section">Films</a></li>
+        <li><a href="#series-section">Series</a></li>
+        <li><a href="#musica-section">Musica</a></li>
+        <li><a href="#libros-section">Literatura</a></li>
+      </ul>
+    </div>
+  </nav>
 
   <header class="user-header">
     <h2 id="user-name">Perfil de Usuario</h2>
   </header>
 
-  <section class="player-section">
+  <section id="player-section" class="player-section">
     <div class="video-wrapper">
       <video id="main-video-player" controls poster="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1200">
         <source id="video-source" src="" type="video/mp4">
@@ -27,7 +40,8 @@
   </section>
 
   <main class="main-content">
-    <section class="section-container">
+    
+    <section id="peliculas-section" class="section-container">
       <h3 class="section-title">Películas Favoritas</h3>
       <div class="carousel-container">
         <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-movies', -1)" aria-label="Anterior">&#10094;</button>
@@ -36,7 +50,7 @@
       </div>
     </section>
 
-    <section class="section-container">
+    <section id="series-section" class="section-container">
       <h3 class="section-title">Series Favoritas</h3>
       <div class="carousel-container">
         <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-series', -1)" aria-label="Anterior">&#10094;</button>
@@ -45,7 +59,7 @@
       </div>
     </section>
 
-    <div class="songs-banner">
+    <div id="musica-section" class="songs-banner">
       <h1>Mis Canciones</h1>
     </div>
 
@@ -59,10 +73,19 @@
             <th>Álbum</th>
           </tr>
         </thead>
-        <tbody id="songs-list">
-          </tbody>
+        <tbody id="songs-list"></tbody>
       </table>
     </section>
+
+    <section id="libros-section" class="section-container">
+      <h3 class="section-title">Libros Favs</h3>
+      <div class="carousel-container">
+        <button class="nav-btn prev-btn" onclick="moverCarrusel('fav-books', -1)" aria-label="Anterior">&#10094;</button>
+        <div id="fav-books" class="carousel-track"></div>
+        <button class="nav-btn next-btn" onclick="moverCarrusel('fav-books', 1)" aria-label="Siguiente">&#10095;</button>
+      </div>
+    </section>
+
   </main>
 
   <div class="audio-player-bar">
