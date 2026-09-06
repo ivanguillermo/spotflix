@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycby1icFrmwb2tX8VkvrVoW_DuyvTaBtQXLkfaPgmPxNFJxfT8WkBDDdriEmevaMhfVAt/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyXn0pg6DW8msmIudBaqrQIAAx9OIya8e0xNN_ComwdGYdhogqZmn922tM5tlZi_747/exec";
 
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
