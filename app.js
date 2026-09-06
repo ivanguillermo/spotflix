@@ -279,27 +279,93 @@ function renderBandas(bandas, catálogoCanciones) {
   activarEventosPaneles();
 }
 
+function renderBandas(bandas, catálogoCanciones) {
+  const container = document.getElementById("panels-container");
+  if (!container) return;
+
+  // Limpiar contenedor antes de renderizar
+  container.innerHTML = "";
+
+  // Forzar exactamente 5 bandas para asegurar los 5 paneles
+  const cincoBandas = bandas.slice(0, 5);
+
+  cincoBandas.forEach((banda, index) => {
+    const panel = document.createElement("div");
+    // Asigna la clase general y la específica (.panel1, .panel2...)
+    panel.className = `panel panel${index + 1}`;
+
+    if (banda.photo && banda.photo.trim() !== "") {
+      panel.style.backgroundImage = `url('${banda.photo.trim()}')`;
+    }
+
+    const palabras = (banda.nombre || 'Banda').split(" ");
+    const textoTop = palabras[0] || "";
+    const textoBottom = palabras.slice(1).join(" ") || banda.Pais || "";
+
+    let htmlCanciones = "";
+    for (let i = 1; i <= 7; i++) {
+      const nombreCancion = banda[`cancion_${i}`];
+      const idCancion = banda[`cancion_${i}_id`];
+
+      if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
+        // Buscar la canción en el catálogo por ID
+        const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
+        
+        // Extraer la URL desde la propiedad .audio (nombre real en tu JSON/BD)
+        const audioUrl = cancionObj ? (cancionObj.audio || "") : "";
+
+        htmlCanciones += `
+          <div class="box box${i}" data-src="${audioUrl}" data-title="${nombreCancion}">
+            ${nombreCancion}
+          </div>
+        `;
+      }
+    }
+
+    panel.innerHTML = `
+      <p>${textoTop}</p>
+      <div class="centro">
+        ${htmlCanciones}
+      </div>
+      <p>${textoBottom}</p>
+    `;
+
+    container.appendChild(panel);
+  });
+
+  // Re-vincular los eventos de clic tras pintar el DOM
+  activarEventosPaneles();
+}
+
 function activarEventosPaneles() {
   const paneletes = document.querySelectorAll('.panel');
   const caja_colores = ['#ef1df3', '#5ae6e6', '#f99a0d', '#f9186b', '#42e25d', '#1db954'];
 
   paneletes.forEach(panel => {
-    panel.addEventListener('click', function() {
-      this.classList.toggle('open');
-    });
+    // Escuchar clic en el panel
+    panel.onclick = function(e) {
+      // Si el clic fue en una canción (.box), no abrir/cerrar el panel
+      if (e.target.classList.contains('box')) return;
 
-    panel.addEventListener('transitionend', function(e) {
+      // Alternar estado de apertura
+      this.classList.toggle('open');
+    };
+
+    // Transición para desplegar texto superior e inferior
+    panel.ontransitionend = function(e) {
       if (e.propertyName.includes('flex')) {
         this.classList.toggle('open-active');
       }
-    });
+    };
   });
 
+  // Evento individual para cada casilla de canción
   const cajas = document.querySelectorAll('.centro .box');
   cajas.forEach(caja => {
-    caja.addEventListener('click', function(e) {
-      e.stopPropagation(); // Evita colapsar el panel al hacer clic en una canción
+    caja.onclick = function(e) {
+      e.stopPropagation(); // Evita que se colapse/expanda el panel
 
+      // Cambiar color aleatorio de la variable CSS --color
       const colorAzar = caja_colores[Math.floor(Math.random() * caja_colores.length)];
       document.documentElement.style.setProperty('--color', colorAzar);
 
@@ -310,58 +376,18 @@ function activarEventosPaneles() {
       if (src && src.trim() !== "" && mainAudioPlayer) {
         mainAudioPlayer.src = src;
         mainAudioPlayer.currentTime = 0;
-        mainAudioPlayer.play().catch(err => console.log("Error de reproducción:", err));
-
-        const titleElem = document.getElementById('audio-track-title');
-        if (titleElem) {
-          titleElem.textContent = title || "Canción Seleccionada";
-        }
+        
+        // Intentar reproducir el audio
+        mainAudioPlayer.play()
+          .then(() => {
+            const titleElem = document.getElementById('audio-track-title');
+            if (titleElem) titleElem.textContent = title || "Canción Seleccionada";
+          })
+          .catch(err => console.error("Error al reproducir audio:", err));
       } else {
-        console.warn("No se encontró una URL de audio válida para esta canción.");
+        alert("Esta canción no tiene una URL de audio válida asignada.");
       }
-    });
-  });
-}
-
-function activarEventosPaneles() {
-  const paneletes = document.querySelectorAll('.panel');
-  const caja_colores = ['#ef1df3', '#5ae6e6', '#f99a0d', '#f9186b', '#42e25d', '#1db954'];
-
-  paneletes.forEach(panel => {
-    panel.addEventListener('click', function() {
-      this.classList.toggle('open');
-    });
-
-    panel.addEventListener('transitionend', function(e) {
-      if (e.propertyName.includes('flex')) {
-        this.classList.toggle('open-active');
-      }
-    });
-  });
-
-  const cajas = document.querySelectorAll('.centro .box');
-  cajas.forEach(caja => {
-    caja.addEventListener('click', function(e) {
-      e.stopPropagation(); // Evita cerrar/abrir el panel al hacer clic en la canción
-
-      const colorAzar = caja_colores[Math.floor(Math.random() * caja_colores.length)];
-      document.documentElement.style.setProperty('--color', colorAzar);
-
-      const src = this.getAttribute('data-src');
-      const title = this.getAttribute('data-title');
-      const mainAudioPlayer = document.getElementById('main-audio-player');
-
-      if (src && mainAudioPlayer) {
-        mainAudioPlayer.src = src;
-        mainAudioPlayer.currentTime = 0;
-        mainAudioPlayer.play();
-
-        const titleElem = document.getElementById('audio-track-title');
-        if (titleElem) {
-          titleElem.textContent = title || "Canción Seleccionada";
-        }
-      }
-    });
+    };
   });
 }
 
