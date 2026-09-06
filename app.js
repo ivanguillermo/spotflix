@@ -225,13 +225,22 @@ function moverCarrusel(containerId, direccion) {
   if (!track) return;
   track.scrollBy({ left: direccion * 175 * 3, behavior: 'smooth' });
 }
+
+// Función aux para convertir cualquier link de Google Drive a Stream directo de audio
+function fixDriveUrl(url) {
+  if (!url) return "";
+  const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return url;
+}
+
 function renderBandas(bandas, catálogoCanciones) {
   const container = document.getElementById("panels-container");
   if (!container) return;
 
   container.innerHTML = "";
-
-  // Mostrar solo las primeras 5 bandas para asegurar los 5 paneles
   const cincoBandas = bandas.slice(0, 5);
 
   cincoBandas.forEach((banda, index) => {
@@ -254,8 +263,9 @@ function renderBandas(bandas, catálogoCanciones) {
       if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
         const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
         
-        // CORREGIDO: Se accede a .audio que es el campo real en tu base de datos
-        const audioUrl = cancionObj ? (cancionObj.audio || "") : "";
+        // Obtener la URL original de la BD y convertirla a stream directo
+        const rawUrl = cancionObj ? (cancionObj.audio || "") : "";
+        const audioUrl = fixDriveUrl(rawUrl);
 
         htmlCanciones += `
           <div class="box box${i}" data-src="${audioUrl}" data-title="${nombreCancion}">
@@ -278,65 +288,6 @@ function renderBandas(bandas, catálogoCanciones) {
 
   activarEventosPaneles();
 }
-
-function renderBandas(bandas, catálogoCanciones) {
-  const container = document.getElementById("panels-container");
-  if (!container) return;
-
-  // Limpiar contenedor antes de renderizar
-  container.innerHTML = "";
-
-  // Forzar exactamente 5 bandas para asegurar los 5 paneles
-  const cincoBandas = bandas.slice(0, 5);
-
-  cincoBandas.forEach((banda, index) => {
-    const panel = document.createElement("div");
-    // Asigna la clase general y la específica (.panel1, .panel2...)
-    panel.className = `panel panel${index + 1}`;
-
-    if (banda.photo && banda.photo.trim() !== "") {
-      panel.style.backgroundImage = `url('${banda.photo.trim()}')`;
-    }
-
-    const palabras = (banda.nombre || 'Banda').split(" ");
-    const textoTop = palabras[0] || "";
-    const textoBottom = palabras.slice(1).join(" ") || banda.Pais || "";
-
-    let htmlCanciones = "";
-    for (let i = 1; i <= 7; i++) {
-      const nombreCancion = banda[`cancion_${i}`];
-      const idCancion = banda[`cancion_${i}_id`];
-
-      if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
-        // Buscar la canción en el catálogo por ID
-        const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
-        
-        // Extraer la URL desde la propiedad .audio (nombre real en tu JSON/BD)
-        const audioUrl = cancionObj ? (cancionObj.audio || "") : "";
-
-        htmlCanciones += `
-          <div class="box box${i}" data-src="${audioUrl}" data-title="${nombreCancion}">
-            ${nombreCancion}
-          </div>
-        `;
-      }
-    }
-
-    panel.innerHTML = `
-      <p>${textoTop}</p>
-      <div class="centro">
-        ${htmlCanciones}
-      </div>
-      <p>${textoBottom}</p>
-    `;
-
-    container.appendChild(panel);
-  });
-
-  // Re-vincular los eventos de clic tras pintar el DOM
-  activarEventosPaneles();
-}
-
 function activarEventosPaneles() {
   const paneletes = document.querySelectorAll('.panel');
   const caja_colores = ['#ef1df3', '#5ae6e6', '#f99a0d', '#f9186b', '#42e25d', '#1db954'];
