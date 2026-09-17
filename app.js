@@ -88,6 +88,13 @@ async function cargarSpotiflix() {
     } else if (data.cat_deportes) {
       renderDeportes("fav-books", data.cat_deportes);
     }
+
+     <section id="deportes-section" class="deportes-container">
+      <div id="sports-stage" class="sports-stage">
+        <!-- El fondo de Ballack y los deportistas recortados se cargan dinámicamente -->
+        <div id="deportes-tooltip" class="sports-tooltip"></div>
+      </div>
+    </section>
     
     // 6. Albums
     if (usuarioActual && usuarioActual.albums && data.cat_albums) {
