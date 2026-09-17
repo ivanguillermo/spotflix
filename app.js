@@ -1,5 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzWHBQ1M6233yznvYwzTavI-rW21ceUswPtyrbF1EA1wlpU9VQUAyHE8bTXZ0rRANvm/exec";
 
+
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
 
 
@@ -65,7 +66,7 @@ async function cargarSpotiflix() {
     } else if (data.cat_libros) {
       renderBooks("fav-books", data.cat_libros);
     }
-          
+    // 4. Bandas      
     if (usuarioActual && usuarioActual.bandas_fav && data.cat_bandas) {
       const bandasIds = usuarioActual.bandas_fav.toString().split(",").map(id => id.trim());
       const bandasFavoritas = bandasIds.map(id => {
@@ -75,11 +76,20 @@ async function cargarSpotiflix() {
     } else if (data.cat_bandas) {
       renderBandas(data.cat_bandas, data.cat_canciones || []);
     }
-
-    if (data.cat_deportes) {
-      renderDeportes(data.cat_deportes);
+    
+    // 5. Deportes
+   
+    if (usuarioActual && usuarioActual.personajes_fav && data.cat_deportes) {
+      const personajesIds = usuarioActual.personajes_fav.toString().split(",");
+      const personajesFavoritos = personajesIds.map(id => {
+        return data.cat_deportes.find(l => l.id && l.id.toString().trim() === id.trim());
+      }).filter(Boolean);    
+      renderDeportes("fav-books", personajesFavoritos);
+    } else if (data.cat_deportes) {
+      renderDeportes("fav-books", data.cat_deportes);
     }
-
+    
+    // 6. Albums
     if (usuarioActual && usuarioActual.albums && data.cat_albums) {
       // Obtener los 15 IDs separados por comas
       const idsAlbumsFav = usuarioActual.albums.toString().split(",").map(id => id.trim());
@@ -350,23 +360,23 @@ function renderDeportes(deportistas) {
   // Limpiar recortes previos si existen
   stage.querySelectorAll('.athlete-cutout').forEach(el => el.remove());
 
-  deportistas.forEach(atleta => {
-    if (!atleta.photo) return;
+  deportistas.forEach(deportista => {
+    if (!deportista.photo) return;
 
     const img = document.createElement("img");
-    img.src = atleta.photo.trim();
-    img.alt = atleta.nombre || "Deportista";
+    img.src = deportista.photo.trim();
+    img.alt = deportista.nombre || "Deportista";
     img.className = "athlete-cutout";
 
     // Aplicar posicionamiento desde la hoja de cálculo
-    img.style.bottom = atleta.pos_bottom || "0%";
-    img.style.left = atleta.pos_left || "50%";
-    img.style.height = atleta.height || "70%";
-    img.style.zIndex = atleta.z_index || "5";
+    img.style.bottom = deportista.pos_bottom || "0%";
+    img.style.left = deportista.pos_left || "50%";
+    img.style.height = deportista.height || "70%";
+    img.style.zIndex = deportista.z_index || "5";
 
     // HOVER: MOSTRAR Y MOVER TOOLTIP
     img.addEventListener("mouseenter", () => {
-      tooltip.textContent = atleta.nombre || "Atleta";
+      tooltip.textContent = deportista.nombre || "Atleta";
       tooltip.classList.add("active");
     });
 
@@ -385,7 +395,7 @@ function renderDeportes(deportistas) {
 
     // CLICK: ABRIR LINK (WIKIPEDIA / EXTERNO)
     img.addEventListener("click", () => {
-      const url = atleta.link || `https://es.wikipedia.org/wiki/${encodeURIComponent(atleta.nombre)}`;
+      const url = deportista.link || `https://es.wikipedia.org/wiki/${encodeURIComponent(deportista.nombre)}`;
       window.open(url, "_blank");
     });
 
