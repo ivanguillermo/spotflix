@@ -2,11 +2,10 @@ const CACHE_NAME = 'mateuna-v1';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './mateuno.js',
-    './mateuno.css',
-    './preguntas.csv',
+    './app.js',
+    './spotflix.css',
     './manifest.json',
-    './assetes/una_logo.png',
+    './spotflix_logo.png',
     'https://cdn.tailwindcss.com'
 ];
 
