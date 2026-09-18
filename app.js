@@ -1,9 +1,5 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzWHBQ1M6233yznvYwzTavI-rW21ceUswPtyrbF1EA1wlpU9VQUAyHE8bTXZ0rRANvm/exec";
-
-
 const DEFAULT_VIDEO = "https://www.w3schools.com/html/mov_bbb.mp4";
-
-
 async function cargarSpotiflix() {
   try {
     const res = await fetch(API_URL);
@@ -408,7 +404,7 @@ function renderAlbums(albums) {
   const grid = document.getElementById("albums-grid");
   if (!grid) return;
 
-  grid.innerHTML = "";
+  grid.innerHTML = "f";
 
   albums.forEach((album, index) => {
     if (!album.poster) return;
@@ -420,7 +416,7 @@ function renderAlbums(albums) {
     card.className = `album-card ${esTop4 ? 'item-big' : ''}`;
 
     card.innerHTML = `
-      <img src="${album.poster.trim()}" alt="${album.nombre || 'Álbum'}" loading="lazy">
+      <img src="${album.poster.trim()}" alt="${album.nombre || 'Álbum'}" >
       <div class="album-tag">
         <span class="album-title">${album.nombre || ''}</span>
         <span class="album-artist">${album.artista || ''}</span>
