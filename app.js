@@ -103,7 +103,7 @@ async function cargarSpotiflix() {
 
   } catch (error) {
     console.error("Error al cargar los datos:", error);
-    document.getElementById("user-name").textContent = "Error al conectar con la API.";
+    document.getElementById("user-name").textContent = "";
   }
 }
 const nombreOnTop = document.getElementById("nombreOnTop");
