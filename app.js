@@ -23,6 +23,7 @@ async function cargarSpotiflix() {
 
       if (usuarioActual.nombre) {
         document.getElementById("user-name").textContent = `Perfil de ${usuarioActual.nombre}`;
+        document.getElementById("nombreOnTop").innerHTML = `${usuarioActual.nombre}`;
       }
     }
 
@@ -109,7 +110,8 @@ async function cargarSpotiflix() {
     document.getElementById("user-name").textContent = "Error al conectar con la API.";
   }
 }
-const nombreOnTop = document.getElementById("brand-logo");
+const nombreOnTop = document.getElementById("nombreOnTop");
+
 // Lógica de reproducción de video
 function reproducirElemento(item, autoPlay = true) {
   const videoPlayer = document.getElementById("main-video-player");
