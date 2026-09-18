@@ -270,7 +270,7 @@ function renderBandas(bandas, catálogoCanciones) {
       const nombreCancion = banda[`cancion_${i}`];
       const idCancion = banda[`cancion_${i}_id`];
 
-      if (nombreCancion && nombreCancion !== "#N/A" && nombreCancion.trim() !== "") {
+      if (nombreCancion && nombreCancion !== "#N/A") {
         const cancionObj = catálogoCanciones.find(c => c.id && c.id.toString().trim() === (idCancion || "").toString().trim());
         
         // Obtener la URL original de la BD y convertirla a stream directo
