@@ -365,24 +365,24 @@ function renderDeportes(deportistas) {
   deportistas.forEach(deportista => {
     if (!deportista.photo) return;
 
-    const img = document.createElement("img");
-    img.src = deportista.photo.trim();
-    img.alt = deportista.nombre || "Deportista";
-    img.className = "athlete-cutout";
+    const imgdep = document.createElement("img");
+    imgdep.src = deportista.photo.trim();
+    imgdep.alt = deportista.nombre || "Deportista";
+    imgdep.className = "athlete-cutout";
 
     // Aplicar posicionamiento desde la hoja de cálculo
-    img.style.bottom = deportista.pos_bottom || "0%";
-    img.style.left = deportista.pos_left || "50%";
-    img.style.height = deportista.height || "70%";
-    img.style.zIndex = deportista.z_index || "5";
+    imgdep.style.bottom = deportista.pos_bottom || "0%";
+    imgdep.style.left = deportista.pos_left || "50%";
+    imgdep.style.height = deportista.height || "70%";
+    imgdep.style.zIndex = deportista.z_index || "5";
 
     // HOVER: MOSTRAR Y MOVER TOOLTIP
-    img.addEventListener("mouseenter", () => {
+    imgdep.addEventListener("mouseenter", () => {
       tooltip.textContent = deportista.nombre || "Atleta";
       tooltip.classList.add("active");
     });
 
-    img.addEventListener("mousemove", (e) => {
+    imgdep.addEventListener("mousemove", (e) => {
       const rect = stage.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -391,17 +391,17 @@ function renderDeportes(deportistas) {
       tooltip.style.top = `${y - 10}px`;
     });
 
-    img.addEventListener("mouseleave", () => {
+    imgdep.addEventListener("mouseleave", () => {
       tooltip.classList.remove("active");
     });
 
     // CLICK: ABRIR LINK (WIKIPEDIA / EXTERNO)
-    img.addEventListener("click", () => {
+    imgdep.addEventListener("click", () => {
       const url = deportista.link || `https://es.wikipedia.org/wiki/${encodeURIComponent(deportista.nombre)}`;
       window.open(url, "_blank");
     });
 
-    stage.appendChild(img);
+    stage.appendChild(imgdep);
   });
 }
 function renderAlbums(albums) {
