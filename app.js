@@ -109,7 +109,7 @@ async function cargarSpotiflix() {
     document.getElementById("user-name").textContent = "Error al conectar con la API.";
   }
 }
-
+const nombreOnTop = document.getElementById("brand-logo");
 // Lógica de reproducción de video
 function reproducirElemento(item, autoPlay = true) {
   const videoPlayer = document.getElementById("main-video-player");
