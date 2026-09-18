@@ -682,3 +682,14 @@ body {
 .album-card:hover .album-tag .album-year {
   color: #000;
 }
+
+.install-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--accent-purple);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
