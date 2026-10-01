@@ -170,12 +170,12 @@ function renderBandas(bandas, canciones) {
   container.innerHTML = bandas.map(b => {
     // Buscar las canciones pertenecientes a esta banda o coincidencia por IDs
     const listaCancionesBanda = [
-      { id: b['cancion id'] || b.sng_1, nombre: b.cancion || 'Canción 1' },
-      { id: b['cancion 2 id'] || b.sng_2, nombre: b['cancion 2'] || 'Canción 2' },
-      { id: b['cancion 3 id'] || b.sng_3, nombre: b['cancion 3'] || 'Canción 3' },
-      { id: b['cancion 4 id'] || b.sng_4, nombre: b['cancion 4'] || 'Canción 4' },
-      { id: b['cancion 5 id'] || b.sng_5, nombre: b['cancion 5'] || 'Canción 5' },
-      { id: b['cancion 6 id'] || b.sng_6, nombre: b['cancion 6'] || 'Canción 6' }
+      { id: b['cancion_1_id'] || b.sng_1, nombre: b.cancion_1 || 'Canción 1' },
+      { id: b['cancion_2_id'] || b.sng_2, nombre: b['cancion_2'] || 'Canción 2' },
+      { id: b['cancion_3_id'] || b.sng_3, nombre: b['cancion_3'] || 'Canción 3' },
+      { id: b['cancion_4_id'] || b.sng_4, nombre: b['cancion_4'] || 'Canción 4' },
+      { id: b['cancion_5_id'] || b.sng_5, nombre: b['cancion_5'] || 'Canción 5' },
+      { id: b['cancion_6_id'] || b.sng_6, nombre: b['cancion_6'] || 'Canción 6' }
     ].filter(item => item.nombre && item.nombre !== '#N/A');
 
     const centroHTML = listaCancionesBanda.map((item, idx) => {
