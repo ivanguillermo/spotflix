@@ -99,6 +99,8 @@ function cargarDatosUsuario(email) {
       // 4. Canciones
       renderCanciones(data.cat_canciones);
 
+      renderBandas(data.cat_bandas, data.cat_canciones);
+
       // 5. Álbumes
       renderAlbums(data.cat_albums);
 
@@ -154,6 +156,81 @@ function renderCanciones(canciones) {
       <td>${c.album || '-'}</td>
     </tr>
   `).join('');
+}
+
+function renderBandas(bandas, canciones) {
+  const container = document.getElementById("panels-container");
+  const section = document.getElementById("bandas");
+  if (!container || !bandas || bandas.length === 0) return;
+
+  // Mostrar la sección si tiene bandas
+  if (section) section.style.display = "block";
+
+  // Mapear cada banda a un panel vertical
+  container.innerHTML = bandas.map(b => {
+    // Buscar las canciones pertenecientes a esta banda o coincidencia por IDs
+    const listaCancionesBanda = [
+      { id: b['cancion id'] || b.sng_1, nombre: b.cancion || 'Canción 1' },
+      { id: b['cancion 2 id'] || b.sng_2, nombre: b['cancion 2'] || 'Canción 2' },
+      { id: b['cancion 3 id'] || b.sng_3, nombre: b['cancion 3'] || 'Canción 3' },
+      { id: b['cancion 4 id'] || b.sng_4, nombre: b['cancion 4'] || 'Canción 4' },
+      { id: b['cancion 5 id'] || b.sng_5, nombre: b['cancion 5'] || 'Canción 5' },
+      { id: b['cancion 6 id'] || b.sng_6, nombre: b['cancion 6'] || 'Canción 6' }
+    ].filter(item => item.nombre && item.nombre !== '#N/A');
+
+    const centroHTML = listaCancionesBanda.map((item, idx) => {
+      // Buscar la URL del audio en el catálogo global de canciones si coincide el nombre o id
+      const cancionObj = canciones ? canciones.find(c => (c.id === item.id || c.cancion === item.nombre)) : null;
+      const audioUrl = cancionObj ? cancionObj.audio : '';
+
+      return `
+        <div class="box box${idx + 1}" 
+             onclick="event.stopPropagation(); reproducirAudio('${audioUrl}', '${item.nombre}', '${b.nombre}')">
+          ${item.nombre}
+        </div>
+      `;
+    }).join('');
+
+    const bgPhoto = b.photo || b.poster || 'https://via.placeholder.com/600x800';
+
+    return `
+      <div class="panel" style="background-image: url('${bgPhoto}');">
+        <p>${b.nombre}</p>
+        <div class="centro">
+          ${centroHTML}
+        </div>
+        <p>${b.Pais || b.pais || ''}</p>
+      </div>
+    `;
+  }).join('');
+
+  // Activar la interactividad de flex grow al hacer click
+  initPanelsEvents();
+}
+
+// Eventos de apertura/cierre de los paneles
+function initPanelsEvents() {
+  const panels = document.querySelectorAll('.panel');
+
+  function toggleOpen() {
+    // Si ya está abierto, se cierra; si no, cierra los demás y abre este
+    const isOpen = this.classList.contains('open');
+    panels.forEach(panel => panel.classList.remove('open'));
+    if (!isOpen) {
+      this.classList.add('open');
+    }
+  }
+
+  function toggleActive(e) {
+    if (e.propertyName.includes('flex')) {
+      this.classList.toggle('open-active', this.classList.contains('open'));
+    }
+  }
+
+  panels.forEach(panel => {
+    panel.addEventListener('click', toggleOpen);
+    panel.addEventListener('transitionend', toggleActive);
+  });
 }
 
 // Renderizado de Álbumes
