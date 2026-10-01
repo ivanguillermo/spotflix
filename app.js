@@ -1,5 +1,5 @@
 // REEMPLAZA CON LA URL DE TU WEB APP DE GOOGLE APPS SCRIPT
-const API_URL = "https://script.google.com/macros/s/AKfycbzuKbwVPzsNiTd8tCxG4DuXi_KkUOh6SxGkEvUPZDE0Tcr6T6mtLZgFfwH8GAwBirsu/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbw_jjfqWdYmN_YjHwtlbldJyWtdjMCynvQaPtFaop3vNQAU9EjaoEhcJAchmyCrzgLC/exec"; 
 
 let deferredPrompt;
 
@@ -96,6 +96,8 @@ function cargarDatosUsuario(email) {
       // 3. Series
       renderCarrusel('fav-series', data.cat_series, 'serie');
 
+      renderCarrusel('fav-animes', data.cat_animes, 'anime');
+
       // 4. Canciones
       renderCanciones(data.cat_canciones);
 
@@ -113,7 +115,7 @@ function cargarDatosUsuario(email) {
     .catch(err => console.error("Error al cargar datos:", err));
 }
 
-// Renderizado de carruseles (Películas, Series, Libros)
+// Renderizado de carruseles (Películas, Series, Animes, Libros)
 function renderCarrusel(containerId, items, tipo) {
   const container = document.getElementById(containerId);
   if (!container || !items) return;
