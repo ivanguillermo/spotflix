@@ -400,48 +400,16 @@ function renderDeportes(deportistas) {
     stage.appendChild(imgdep);
   });
 }
-function renderAlbums(albums) {
-  const grid = document.getElementById("albums-grid");
-  if (!grid) return;
-
-  grid.innerHTML = "f";
-
-  albums.forEach((album, index) => {
-    if (!album.poster) return;
-
-    const card = document.createElement("div");
-    
-    // Los primeros 4 álbumes (índices 0, 1, 2 y 3) reciben la clase 'item-big'
-    const esTop4 = index < 4;
-    card.className = `album-card ${esTop4 ? 'item-big' : ''}`;
-
-    card.innerHTML = `
-      <img src="${album.poster.trim()}" alt="${album.nombre || 'Álbum'}" >
-      <div class="album-tag">
-        <span class="album-title">${album.nombre || ''}</span>
-        <span class="album-artist">${album.artista || ''}</span>
-        <span class="album-year">${album.year || ''}</span>
-      </div>
-    `;
-
-    // REPRODUCCIÓN DE AUDIO AL HACER CLIC
-    card.addEventListener("click", () => {
-      const mainAudioPlayer = document.getElementById("main-audio-player");
-      const titleElem = document.getElementById("audio-track-title");
-
-      if (album.audio && mainAudioPlayer) {
-        mainAudioPlayer.src = album.audio.trim();
-        mainAudioPlayer.currentTime = 0;
-        mainAudioPlayer.play();
-
-        if (titleElem) {
-          titleElem.textContent = `${album.nombre} - ${album.artista}`;
-        }
-      }
-    });
-
-    grid.appendChild(card);
-  });
+function renderAlbums(albumsList) {
+  const container = document.getElementById('albums-container');
+  container.innerHTML = albumsList.map(alb => `
+    <div class="card-album" data-id="${alb.id}">
+      <img src="${alb.poster}" alt="${alb.nombre}" />
+      <h3>${alb.nombre}</h3>
+      <p>${alb.artista} • ${alb.year}</p>
+      <audio controls src="${alb.audio}"></audio>
+    </div>
+  `).join('');
 }
 
 cargarSpotiflix();
