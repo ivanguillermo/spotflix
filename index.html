@@ -12,7 +12,8 @@
     <!-- Google Identity Services (OAuth) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <!-- Estilos personalizados -->
-    <link rel="stylesheet" href="spotflix.css">   
+    <link rel="stylesheet" href="spotflix.css"> 
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div id="pwa-install-banner" class="install-banner" style="display:;">
@@ -146,5 +147,11 @@
   </div>
 
   <script src="app.js"></script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
 </body>
 </html>
