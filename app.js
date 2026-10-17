@@ -317,6 +317,11 @@ function moverCarrusel(id, direccion) {
   }
 }
 
+if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
     .then(reg => console.log('Service Worker registrado:', reg))
